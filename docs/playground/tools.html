@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tool Playground - VeinLab</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <style>
+    .tools-container { padding: 2rem 0; }
+    .tools-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; margin-bottom: 2rem; }
+    .tools-panel { background: var(--bg-secondary); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-color); }
+    .tool-item { padding: 1rem; margin-bottom: 0.5rem; background: var(--bg-tertiary); border-radius: 0.5rem; border: 1px solid var(--border-color); }
+    .tool-item h4 { margin-bottom: 0.5rem; }
+    .tool-item code { font-size: 0.85rem; color: var(--accent-color); }
+    .chat-panel { background: var(--bg-secondary); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-color); }
+    .messages { max-height: 400px; overflow-y: auto; margin-bottom: 1rem; }
+    .message { margin-bottom: 1rem; padding: 0.75rem; border-radius: 0.5rem; }
+    .message.user { background: var(--bg-tertiary); }
+    .message.assistant { background: rgba(102, 126, 234, 0.1); }
+    .message.tool { background: rgba(16, 185, 129, 0.1); border-left: 3px solid #10b981; }
+    .input-area { display: flex; gap: 0.5rem; }
+    .input-area input { flex: 1; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 0.5rem; color: var(--text-primary); }
+    .input-area button { padding: 0.75rem 1.5rem; background: var(--accent-gradient); border: none; border-radius: 0.5rem; color: white; cursor: pointer; }
+    @media (max-width: 768px) { .tools-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo"><a href="../" style="text-decoration: none; color: inherit;">⚡ VeinLab</a></h1>
+      <nav class="nav"><a href="../">Home</a></nav>
+    </div>
+  </header>
+
+  <div class="tools-container">
+    <div class="container">
+      <h2 class="section-title">🛠️ Function Calling Playground</h2>
+      <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">Watch AI decide when to use tools</p>
+
+      <div class="tools-grid">
+        <div class="tools-panel">
+          <h3 style="margin-bottom: 1rem;">Available Tools</h3>
+          <div class="tool-item">
+            <h4>🌤️ get_weather</h4>
+            <code>location: string</code>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">Get current weather</p>
+          </div>
+          <div class="tool-item">
+            <h4>🧮 calculator</h4>
+            <code>expression: string</code>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">Evaluate math</p>
+          </div>
+          <div class="tool-item">
+            <h4>🔍 web_search</h4>
+            <code>query: string</code>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">Search the web</p>
+          </div>
+          <div class="tool-item">
+            <h4>📧 send_email</h4>
+            <code>to, subject, body</code>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">Send email</p>
+          </div>
+          <div class="tool-item">
+            <h4>🕐 get_datetime</h4>
+            <code>timezone?: string</code>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">Get current time</p>
+          </div>
+          <div class="tool-item">
+            <h4>💱 convert_currency</h4>
+            <code>amount, from, to</code>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">Currency conversion</p>
+          </div>
+        </div>
+
+        <div class="chat-panel">
+          <h3 style="margin-bottom: 1rem;">Chat</h3>
+          <div class="messages" id="messages"></div>
+          <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Try: What's the weather in Tokyo?" />
+            <button onclick="sendMessage()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/ollama-client.js"></script>
+  <script>
+    const messageInput = document.getElementById('messageInput');
+    messageInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    async function sendMessage() {
+      const input = messageInput.value.trim();
+      if (!input) return;
+
+      const messagesDiv = document.getElementById('messages');
+      messagesDiv.innerHTML += `<div class="message user"><strong>You:</strong> ${input}</div>`;
+      messageInput.value = '';
+
+      // Detect which tool to use
+      const toolPatterns = {
+        weather: /weather|temperature|forecast/i,
+        calculator: /calculate|compute|math|\d+[\+\-\*\/]/,
+        search: /search|find|look up/i,
+        email: /email|send|message/i,
+        datetime: /time|date|clock/i,
+        currency: /convert|currency|exchange/i
+      };
+
+      let toolUsed = null;
+      for (const [tool, pattern] of Object.entries(toolPatterns)) {
+        if (pattern.test(input)) {
+          toolUsed = tool;
+          break;
+        }
+      }
+
+      if (toolUsed) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const toolCalls = {
+          weather: `get_weather(location="Tokyo") → {"temp": 18, "condition": "Partly cloudy"}`,
+          calculator: `calculator(expression="42 * 7") → 294`,
+          search: `web_search(query="latest AI news") → [3 results found]`,
+          email: `send_email(to="user@example.com", subject="Hello") → Sent`,
+          datetime: `get_datetime() → "2025-01-15 14:30:00 UTC"`,
+          currency: `convert_currency(amount=100, from="USD", to="EUR") → 92.50`
+        };
+        
+        messagesDiv.innerHTML += `<div class="message tool"><strong>🔧 Tool Call:</strong> ${toolCalls[toolUsed]}</div>`;
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      messagesDiv.innerHTML += `<div class="message assistant"><strong>Assistant:</strong> ${toolUsed ? `I used the ${toolUsed} tool to help answer your question. ` : ''}This is a demo showing how AI models can decide when to call functions. In production, this uses deepseek-v3.1:671b-cloud with real tool definitions.</div>`;
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+  </script>
+</body>
+</html>

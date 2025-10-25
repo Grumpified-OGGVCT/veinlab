@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Assistant - VeinLab</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <style>
+    .code-container { padding: 2rem 0; }
+    .task-selector { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .task-btn { padding: 1rem; background: var(--bg-secondary); border: 2px solid var(--border-color); border-radius: 0.5rem; cursor: pointer; text-align: center; transition: all 0.3s; }
+    .task-btn.active { background: var(--accent-gradient); border-color: transparent; }
+    .lang-selector { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem; }
+    .lang-btn { padding: 0.5rem 1rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 0.5rem; cursor: pointer; font-size: 0.9rem; }
+    .lang-btn.active { border-color: var(--accent-color); }
+    .code-input { width: 100%; min-height: 200px; padding: 1rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 0.5rem; color: var(--text-primary); font-family: 'Courier New', monospace; font-size: 0.9rem; }
+    .process-btn { width: 100%; padding: 1rem; background: var(--accent-gradient); border: none; border-radius: 0.5rem; color: white; font-weight: 600; cursor: pointer; margin: 1rem 0; }
+    .output { background: var(--bg-secondary); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-color); margin-top: 1rem; display: none; }
+    .output pre { background: var(--bg-tertiary); padding: 1rem; border-radius: 0.5rem; overflow-x: auto; }
+    .copy-btn { float: right; padding: 0.5rem 1rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 0.5rem; cursor: pointer; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo"><a href="../" style="text-decoration: none; color: inherit;">⚡ VeinLab</a></h1>
+      <nav class="nav"><a href="../">Home</a></nav>
+    </div>
+  </header>
+
+  <div class="code-container">
+    <div class="container">
+      <h2 class="section-title">💻 Code Assistant</h2>
+      <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">Powered by qwen3-coder:480b-cloud</p>
+
+      <div class="task-selector">
+        <div class="task-btn active" data-task="generate" onclick="selectTask('generate')">
+          <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">✨</div>
+          <strong>Generate</strong>
+        </div>
+        <div class="task-btn" data-task="explain" onclick="selectTask('explain')">
+          <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📖</div>
+          <strong>Explain</strong>
+        </div>
+        <div class="task-btn" data-task="debug" onclick="selectTask('debug')">
+          <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🐛</div>
+          <strong>Debug</strong>
+        </div>
+        <div class="task-btn" data-task="optimize" onclick="selectTask('optimize')">
+          <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⚡</div>
+          <strong>Optimize</strong>
+        </div>
+        <div class="task-btn" data-task="convert" onclick="selectTask('convert')">
+          <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔄</div>
+          <strong>Convert</strong>
+        </div>
+        <div class="task-btn" data-task="document" onclick="selectTask('document')">
+          <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📝</div>
+          <strong>Document</strong>
+        </div>
+      </div>
+
+      <div class="lang-selector">
+        <span class="lang-btn active" onclick="selectLang('python')">Python</span>
+        <span class="lang-btn" onclick="selectLang('javascript')">JavaScript</span>
+        <span class="lang-btn" onclick="selectLang('typescript')">TypeScript</span>
+        <span class="lang-btn" onclick="selectLang('java')">Java</span>
+        <span class="lang-btn" onclick="selectLang('cpp')">C++</span>
+        <span class="lang-btn" onclick="selectLang('go')">Go</span>
+        <span class="lang-btn" onclick="selectLang('rust')">Rust</span>
+      </div>
+
+      <textarea class="code-input" id="codeInput" placeholder="Paste your code here or describe what you want to generate..."></textarea>
+      <button class="process-btn" onclick="processCode()">Process Code</button>
+
+      <div class="output" id="output">
+        <button class="copy-btn" onclick="copyOutput()">📋 Copy</button>
+        <h3 style="margin-bottom: 1rem;" id="outputTitle">Result</h3>
+        <pre id="outputCode"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentTask = 'generate';
+    let currentLang = 'python';
+
+    function selectTask(task) {
+      currentTask = task;
+      document.querySelectorAll('.task-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.task === task);
+      });
+    }
+
+    function selectLang(lang) {
+      currentLang = lang;
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase().includes(lang));
+      });
+    }
+
+    async function processCode() {
+      const input = document.getElementById('codeInput').value.trim();
+      if (!input) return;
+
+      const output = document.getElementById('output');
+      const outputTitle = document.getElementById('outputTitle');
+      const outputCode = document.getElementById('outputCode');
+
+      output.style.display = 'block';
+      outputTitle.textContent = 'Processing...';
+      outputCode.textContent = 'Working with qwen3-coder:480b-cloud...';
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      const demoOutputs = {
+        generate: `# Generated ${currentLang} code\ndef fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)\n\n# Example usage\nprint(fibonacci(10))`,
+        explain: `This code implements a recursive Fibonacci sequence generator.\n\nKey concepts:\n- Base case: Returns n when n <= 1\n- Recursive case: Sums previous two numbers\n- Time complexity: O(2^n) - exponential\n- Space complexity: O(n) - call stack depth`,
+        debug: `Found issue: Missing base case validation\n\nFixed code:\ndef fibonacci(n):\n    if not isinstance(n, int) or n < 0:\n        raise ValueError("n must be non-negative integer")\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)`,
+        optimize: `Optimized with memoization:\n\ndef fibonacci(n, memo={}):\n    if n in memo:\n        return memo[n]\n    if n <= 1:\n        return n\n    memo[n] = fibonacci(n-1, memo) + fibonacci(n-2, memo)\n    return memo[n]\n\n# Now O(n) instead of O(2^n)`,
+        convert: `// Converted to JavaScript\nfunction fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n - 1) + fibonacci(n - 2);\n}\n\nconsole.log(fibonacci(10));`,
+        document: `/**\n * Calculates the nth Fibonacci number using recursion\n * @param {number} n - The position in Fibonacci sequence\n * @returns {number} The nth Fibonacci number\n * @example\n * fibonacci(10) // returns 55\n */\nfunction fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n - 1) + fibonacci(n - 2);\n}`
+      };
+
+      outputTitle.textContent = currentTask.charAt(0).toUpperCase() + currentTask.slice(1) + ' Result';
+      outputCode.textContent = demoOutputs[currentTask];
+    }
+
+    function copyOutput() {
+      const code = document.getElementById('outputCode').textContent;
+      navigator.clipboard.writeText(code);
+      alert('Copied to clipboard!');
+    }
+  </script>
+</body>
+</html>

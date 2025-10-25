@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Search Q&A - VeinLab</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <style>
+    .search-container { padding: 2rem 0; }
+    .search-box { max-width: 700px; margin: 0 auto 3rem; }
+    .search-input { width: 100%; padding: 1rem; background: var(--bg-secondary); border: 2px solid var(--border-color); border-radius: 0.5rem; color: var(--text-primary); font-size: 1.1rem; }
+    .search-input:focus { outline: none; border-color: var(--accent-color); }
+    .quick-queries { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; justify-content: center; }
+    .quick-query { padding: 0.5rem 1rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 1rem; font-size: 0.9rem; cursor: pointer; }
+    .quick-query:hover { border-color: var(--accent-color); }
+    .results-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; margin-top: 2rem; }
+    .sources { background: var(--bg-secondary); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-color); }
+    .source-item { padding: 0.75rem; margin-bottom: 0.5rem; background: var(--bg-tertiary); border-radius: 0.5rem; font-size: 0.9rem; }
+    .source-item a { color: var(--accent-color); text-decoration: none; }
+    .answer { background: var(--bg-secondary); padding: 2rem; border-radius: 1rem; border: 1px solid var(--border-color); }
+    .answer h3 { margin-bottom: 1rem; }
+    @media (max-width: 768px) { .results-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo"><a href="../" style="text-decoration: none; color: inherit;">⚡ VeinLab</a></h1>
+      <nav class="nav"><a href="../">Home</a></nav>
+    </div>
+  </header>
+
+  <div class="search-container">
+    <div class="container">
+      <h2 class="section-title">🔍 Web-Augmented Q&A</h2>
+      <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">Ask questions, get AI answers with web sources</p>
+
+      <div class="search-box">
+        <input type="text" class="search-input" id="queryInput" placeholder="Ask anything..." />
+        <div class="quick-queries">
+          <span class="quick-query" onclick="setQuery('What are the latest developments in AI?')">Latest AI news</span>
+          <span class="quick-query" onclick="setQuery('How does Ollama Cloud compare to other LLM services?')">Ollama vs others</span>
+          <span class="quick-query" onclick="setQuery('Best practices for prompt engineering')">Prompt tips</span>
+        </div>
+      </div>
+
+      <div class="results-grid" id="results" style="display: none;">
+        <div class="sources">
+          <h3 style="margin-bottom: 1rem;">📚 Sources</h3>
+          <div id="sourcesList"></div>
+        </div>
+        <div class="answer">
+          <h3>💡 AI Answer</h3>
+          <div id="answerText" style="color: var(--text-secondary); line-height: 1.8;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/ollama-client.js"></script>
+  <script>
+    const queryInput = document.getElementById('queryInput');
+    
+    queryInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') search();
+    });
+
+    function setQuery(text) {
+      queryInput.value = text;
+      search();
+    }
+
+    async function search() {
+      const query = queryInput.value.trim();
+      if (!query) return;
+
+      const results = document.getElementById('results');
+      const sourcesList = document.getElementById('sourcesList');
+      const answerText = document.getElementById('answerText');
+
+      results.style.display = 'grid';
+      sourcesList.innerHTML = '<em>Searching web...</em>';
+      answerText.innerHTML = '<em>Generating answer...</em>';
+
+      // Simulate web search + AI synthesis
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      const demoSources = [
+        { title: 'Ollama Blog - Cloud Launch', url: 'https://ollama.com/blog/cloud' },
+        { title: 'TechCrunch - AI Models Go Cloud', url: 'https://techcrunch.com/ai-cloud' },
+        { title: 'GitHub - Ollama Documentation', url: 'https://github.com/ollama/ollama' }
+      ];
+
+      sourcesList.innerHTML = demoSources.map(s => 
+        `<div class="source-item"><a href="${s.url}" target="_blank">${s.title}</a></div>`
+      ).join('');
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      answerText.innerHTML = `Based on recent sources, ${query.toLowerCase().includes('ollama') ? 'Ollama Cloud offers massive models like deepseek-v3.1:671b and kimi-k2:1t with cloud-scale inference while maintaining the simple API developers love.' : 'the AI landscape is rapidly evolving with new capabilities in reasoning, vision, and tool use becoming standard across major providers.'}<br><br>This demo shows how web search augmentation works - in production, this would use real-time web results combined with AI synthesis using deepseek-v3.1:671b-cloud or gpt-oss:120b-cloud.`;
+    }
+  </script>
+</body>
+</html>

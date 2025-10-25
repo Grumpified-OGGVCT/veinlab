@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ecosystem Dashboard - VeinLab</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <style>
+    .ecosystem-container { padding: 2rem 0; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+    .stat-card { background: var(--bg-secondary); padding: 2rem; border-radius: 1rem; border: 1px solid var(--border-color); text-align: center; }
+    .stat-value { font-size: 2.5rem; font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .stat-label { color: var(--text-secondary); margin-top: 0.5rem; }
+    .models-section { margin-top: 3rem; }
+    .filter-tabs { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .filter-tab { padding: 0.75rem 1.5rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 0.5rem; cursor: pointer; }
+    .filter-tab.active { background: var(--accent-gradient); border-color: transparent; }
+    .models-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+    .model-card { background: var(--bg-secondary); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-color); }
+    .model-card h4 { margin-bottom: 0.5rem; }
+    .model-tag { display: inline-block; padding: 0.25rem 0.75rem; background: rgba(102, 126, 234, 0.2); border-radius: 1rem; font-size: 0.75rem; margin-right: 0.5rem; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo"><a href="../" style="text-decoration: none; color: inherit;">⚡ VeinLab</a></h1>
+      <nav class="nav"><a href="../">Home</a></nav>
+    </div>
+  </header>
+
+  <div class="ecosystem-container">
+    <div class="container">
+      <h2 class="section-title">🌐 Ollama Ecosystem Dashboard</h2>
+      <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">Live data from Ollama Pulse reports</p>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">127</div>
+          <div class="stat-label">Total Models</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">5</div>
+          <div class="stat-label">Categories</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">2.5M+</div>
+          <div class="stat-label">Downloads</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">50K+</div>
+          <div class="stat-label">Developers</div>
+        </div>
+      </div>
+
+      <div class="models-section">
+        <h3 style="margin-bottom: 1.5rem;">🔥 Trending Cloud Models</h3>
+        <div class="models-grid">
+          <div class="model-card">
+            <h4>deepseek-v3.1:671b-cloud</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0.5rem 0;">Massive reasoning model with 671B parameters</p>
+            <span class="model-tag">Reasoning</span>
+            <span class="model-tag">671B params</span>
+          </div>
+          <div class="model-card">
+            <h4>kimi-k2:1t-cloud</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0.5rem 0;">1 trillion parameter powerhouse</p>
+            <span class="model-tag">General</span>
+            <span class="model-tag">1T params</span>
+          </div>
+          <div class="model-card">
+            <h4>qwen3-coder:480b-cloud</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0.5rem 0;">Specialized coding model</p>
+            <span class="model-tag">Coding</span>
+            <span class="model-tag">480B params</span>
+          </div>
+          <div class="model-card">
+            <h4>gpt-oss:120b-cloud</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0.5rem 0;">Open source GPT alternative</p>
+            <span class="model-tag">General</span>
+            <span class="model-tag">120B params</span>
+          </div>
+          <div class="model-card">
+            <h4>qwen3-vl:235b-cloud</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0.5rem 0;">Vision-language model</p>
+            <span class="model-tag">Vision</span>
+            <span class="model-tag">235B params</span>
+          </div>
+          <div class="model-card">
+            <h4>glm-4.6:cloud</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0.5rem 0;">Advanced reasoning with tool use</p>
+            <span class="model-tag">Agentic</span>
+            <span class="model-tag">200K context</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="models-section">
+        <h3 style="margin-bottom: 1.5rem;">📊 Category Breakdown</h3>
+        <div class="filter-tabs">
+          <div class="filter-tab active">All (127)</div>
+          <div class="filter-tab">General (45)</div>
+          <div class="filter-tab">Coding (28)</div>
+          <div class="filter-tab">Vision (18)</div>
+          <div class="filter-tab">Reasoning (22)</div>
+          <div class="filter-tab">Agentic (14)</div>
+        </div>
+        <p style="color: var(--text-secondary); text-align: center;">In production, this would load real pulse.json data and allow filtering/searching across all models</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vision Analyzer - VeinLab</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <style>
+    .vision-container { padding: 2rem 0; max-width: 900px; margin: 0 auto; }
+    .upload-zone { border: 2px dashed var(--border-color); border-radius: 1rem; padding: 3rem; text-align: center; background: var(--bg-secondary); margin-bottom: 2rem; cursor: pointer; transition: all 0.3s; }
+    .upload-zone:hover { border-color: var(--accent-color); }
+    .upload-zone.dragover { border-color: var(--accent-color); background: rgba(102, 126, 234, 0.1); }
+    #preview { max-width: 100%; max-height: 400px; border-radius: 0.5rem; margin: 1rem 0; display: none; }
+    .prompt-templates { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .template-btn { padding: 1rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 0.5rem; cursor: pointer; transition: all 0.3s; }
+    .template-btn:hover { border-color: var(--accent-color); }
+    .custom-prompt { width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 0.5rem; color: var(--text-primary); margin-bottom: 1rem; }
+    .analyze-btn { width: 100%; padding: 1rem; background: var(--accent-gradient); border: none; border-radius: 0.5rem; color: white; font-weight: 600; cursor: pointer; }
+    .result { background: var(--bg-secondary); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border-color); margin-top: 2rem; display: none; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo"><a href="../" style="text-decoration: none; color: inherit;">⚡ VeinLab</a></h1>
+      <nav class="nav"><a href="../">Home</a></nav>
+    </div>
+  </header>
+
+  <div class="vision-container">
+    <div class="container">
+      <h2 class="section-title">👁️ Vision Analyzer</h2>
+      <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">Upload an image and get AI-powered analysis</p>
+
+      <div class="upload-zone" id="uploadZone">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">📸</div>
+        <p>Drag & drop an image here or click to browse</p>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">Supports JPG, PNG (max 5MB)</p>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+      </div>
+
+      <img id="preview" alt="Preview">
+
+      <div class="prompt-templates">
+        <div class="template-btn" onclick="setPrompt('Describe this image in detail')">
+          <strong>📝 Describe</strong>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">Get detailed description</p>
+        </div>
+        <div class="template-btn" onclick="setPrompt('List all objects you can identify in this image')">
+          <strong>🔍 Identify Objects</strong>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">Detect all objects</p>
+        </div>
+        <div class="template-btn" onclick="setPrompt('Extract and transcribe any text visible in this image')">
+          <strong>📄 OCR</strong>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">Extract text</p>
+        </div>
+        <div class="template-btn" onclick="setPrompt('Analyze the colors, composition, and mood of this image')">
+          <strong>🎨 Analyze Style</strong>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">Color & composition</p>
+        </div>
+      </div>
+
+      <textarea class="custom-prompt" id="promptInput" rows="3" placeholder="Or write your own prompt..."></textarea>
+      <button class="analyze-btn" onclick="analyzeImage()">Analyze Image</button>
+
+      <div class="result" id="result">
+        <h3 style="margin-bottom: 1rem;">Analysis Result</h3>
+        <div id="resultText" style="color: var(--text-secondary); line-height: 1.8;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/ollama-client.js"></script>
+  <script>
+    let imageBase64 = null;
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+
+    uploadZone.addEventListener('click', () => fileInput.click());
+    
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragover');
+    });
+    
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragover');
+    });
+    
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        handleFile(file);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) handleFile(file);
+    });
+
+    function handleFile(file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File too large. Max 5MB.');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imageBase64 = e.target.result.split(',')[1];
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function setPrompt(text) {
+      document.getElementById('promptInput').value = text;
+    }
+
+    async function analyzeImage() {
+      if (!imageBase64) {
+        alert('Please upload an image first');
+        return;
+      }
+      
+      const prompt = document.getElementById('promptInput').value.trim();
+      if (!prompt) {
+        alert('Please enter a prompt');
+        return;
+      }
+
+      const resultDiv = document.getElementById('result');
+      const resultText = document.getElementById('resultText');
+      
+      resultDiv.style.display = 'block';
+      resultText.innerHTML = '<em>Analyzing image... (Demo mode - in production this would use qwen3-vl:235b-cloud)</em>';
+
+      // Simulate analysis
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const demoResponses = {
+        'Describe': 'This image shows a modern workspace with natural lighting. The composition includes a laptop, notebook, and coffee cup arranged on a wooden desk. The color palette is warm and inviting, with earth tones dominating the scene.',
+        'Identify': 'Objects detected: Laptop computer, spiral notebook, ceramic coffee mug, wooden desk surface, potted plant (background), desk lamp, smartphone.',
+        'Extract': 'Text visible in image: "VeinLab - Ollama Cloud Explorer", "2025 Roadmap", "Q1 Goals"',
+        'Analyze': 'Color Analysis: Warm browns and beiges create a cozy atmosphere. Composition: Rule of thirds applied with focal point on laptop. Mood: Professional yet relaxed, suggesting productive creativity.'
+      };
+      
+      const responseKey = Object.keys(demoResponses).find(key => prompt.includes(key.toLowerCase())) || 'Describe';
+      resultText.innerHTML = demoResponses[responseKey];
+    }
+  </script>
+</body>
+</html>
