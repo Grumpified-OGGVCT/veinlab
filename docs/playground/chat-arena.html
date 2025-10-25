@@ -7,6 +7,13 @@
   <link rel="stylesheet" href="../assets/css/main.css">
   <style>
     .arena { padding: 2rem 0; }
+    .api-key-section { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 2rem; }
+    .api-key-input { display: flex; gap: 0.5rem; align-items: center; }
+    .api-key-input input { flex: 1; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 0.5rem; color: var(--text-primary); font-family: monospace; }
+    .api-key-input button { padding: 0.75rem 1.5rem; background: var(--accent-gradient); border: none; border-radius: 0.5rem; color: white; cursor: pointer; }
+    .api-key-status { margin-top: 0.5rem; font-size: 0.875rem; }
+    .api-key-status.success { color: #10b981; }
+    .api-key-status.error { color: #ef4444; }
     .model-selector { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
     .model-btn { padding: 0.75rem 1.5rem; background: var(--bg-secondary); border: 2px solid var(--border-color); border-radius: 0.5rem; color: var(--text-primary); cursor: pointer; }
     .model-btn.active { background: var(--accent-gradient); border-color: transparent; }
@@ -32,8 +39,18 @@
 
   <div class="arena">
     <div class="container">
-      <h2 class="section-title">�� Chat Arena</h2>
+      <h2 class="section-title">💬 Chat Arena</h2>
       <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">Compare up to 3 Ollama Cloud models side-by-side</p>
+
+      <div class="api-key-section">
+        <h3 style="margin-bottom: 1rem;">🔑 Ollama Cloud API Key</h3>
+        <div class="api-key-input">
+          <input type="password" id="apiKeyInput" placeholder="Enter your Ollama Cloud API key..." />
+          <button onclick="saveApiKey()">Save Key</button>
+          <button onclick="clearApiKey()" style="background: #ef4444;">Clear</button>
+        </div>
+        <div id="apiKeyStatus" class="api-key-status"></div>
+      </div>
 
       <div class="model-selector">
         <button class="model-btn" data-model="deepseek-v3.1:671b-cloud">DeepSeek v3.1 (671B)</button>
@@ -56,57 +73,102 @@
   <script>
     let selectedModels = [];
     const maxModels = 3;
+    const API_KEY_STORAGE = ''veinlab_ollama_api_key'';
 
-    document.querySelectorAll('.model-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
+    // Load API key on page load
+    window.addEventListener(''DOMContentLoaded'', () => {
+      const savedKey = localStorage.getItem(API_KEY_STORAGE);
+      if (savedKey) {
+        document.getElementById(''apiKeyInput'').value = savedKey;
+        updateApiKeyStatus(''✅ API key loaded from storage'', ''success'');
+      }
+    });
+
+    function saveApiKey() {
+      const key = document.getElementById(''apiKeyInput'').value.trim();
+      if (!key) {
+        updateApiKeyStatus(''❌ Please enter an API key'', ''error'');
+        return;
+      }
+      localStorage.setItem(API_KEY_STORAGE, key);
+      updateApiKeyStatus(''✅ API key saved successfully'', ''success'');
+    }
+
+    function clearApiKey() {
+      localStorage.removeItem(API_KEY_STORAGE);
+      document.getElementById(''apiKeyInput'').value = '''';
+      updateApiKeyStatus(''🗑️ API key cleared'', ''error'');
+    }
+
+    function updateApiKeyStatus(message, type) {
+      const status = document.getElementById(''apiKeyStatus'');
+      status.textContent = message;
+      status.className = `api-key-status ${type}`;
+    }
+
+    function getApiKey() {
+      return localStorage.getItem(API_KEY_STORAGE);
+    }
+
+    document.querySelectorAll(''.model-btn'').forEach(btn => {
+      btn.addEventListener(''click'', () => {
         const model = btn.dataset.model;
         if (selectedModels.includes(model)) {
           selectedModels = selectedModels.filter(m => m !== model);
-          btn.classList.remove('active');
+          btn.classList.remove(''active'');
         } else if (selectedModels.length < maxModels) {
           selectedModels.push(model);
-          btn.classList.add('active');
+          btn.classList.add(''active'');
         }
         renderChatWindows();
       });
     });
 
     function renderChatWindows() {
-      const grid = document.getElementById('chatGrid');
-      grid.innerHTML = '';
+      const grid = document.getElementById(''chatGrid'');
+      grid.innerHTML = '''';
       selectedModels.forEach(model => {
-        const window = document.createElement('div');
-        window.className = 'chat-window';
+        const window = document.createElement(''div'');
+        window.className = ''chat-window'';
         window.innerHTML = `<div class="chat-header">${model}</div><div class="messages" id="messages-${model}"></div>`;
         grid.appendChild(window);
       });
     }
 
     async function sendMessage() {
-      const input = document.getElementById('messageInput');
+      const input = document.getElementById(''messageInput'');
       const message = input.value.trim();
       if (!message || selectedModels.length === 0) return;
-      input.value = '';
+
+      const apiKey = getApiKey();
+      if (!apiKey) {
+        updateApiKeyStatus(''❌ Please save your API key first'', ''error'');
+        return;
+      }
+
+      input.value = '''';
       
       selectedModels.forEach(model => {
         const messagesDiv = document.getElementById(`messages-${model}`);
         messagesDiv.innerHTML += `<div class="message user"><strong>You:</strong> ${message}</div>`;
       });
 
+      // In production, this would use the OllamaClient with the API key
+      // For now, showing demo responses
       selectedModels.forEach(async model => {
         const messagesDiv = document.getElementById(`messages-${model}`);
         await new Promise(resolve => setTimeout(resolve, 500));
         const responses = [
-          `This is ${model} responding. In production, this would connect to Ollama Cloud API for real responses.`,
-          `${model} here! This demo shows side-by-side comparison of Ollama Cloud models.`
+          `This is ${model} responding. In production, this would connect to Ollama Cloud API using your saved API key.`,
+          `${model} here! This demo shows side-by-side comparison of Ollama Cloud models with API key authentication.`
         ];
         messagesDiv.innerHTML += `<div class="message assistant"><strong>Assistant:</strong> ${responses[Math.floor(Math.random() * responses.length)]}</div>`;
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
       });
     }
 
-    document.getElementById('messageInput').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendMessage();
+    document.getElementById(''messageInput'').addEventListener(''keypress'', (e) => {
+      if (e.key === ''Enter'') sendMessage();
     });
   </script>
 </body>
