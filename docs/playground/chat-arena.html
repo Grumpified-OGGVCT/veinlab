@@ -33,12 +33,14 @@
   <div class="arena">
     <div class="container">
       <h2 class="section-title">�� Chat Arena</h2>
-      <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">Compare up to 3 models side-by-side</p>
+      <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">Compare up to 3 Ollama Cloud models side-by-side</p>
 
       <div class="model-selector">
-        <button class="model-btn" data-model="llama2">Llama 2</button>
-        <button class="model-btn" data-model="mistral">Mistral</button>
-        <button class="model-btn" data-model="codellama">CodeLlama</button>
+        <button class="model-btn" data-model="deepseek-v3.1:671b-cloud">DeepSeek v3.1 (671B)</button>
+        <button class="model-btn" data-model="gpt-oss:120b-cloud">GPT-OSS (120B)</button>
+        <button class="model-btn" data-model="kimi-k2:1t-cloud">Kimi K2 (1T)</button>
+        <button class="model-btn" data-model="qwen3-coder:480b-cloud">Qwen3 Coder (480B)</button>
+        <button class="model-btn" data-model="glm-4.6:cloud">GLM-4.6</button>
       </div>
 
       <div class="chat-grid" id="chatGrid"></div>
@@ -95,8 +97,8 @@
         const messagesDiv = document.getElementById(`messages-${model}`);
         await new Promise(resolve => setTimeout(resolve, 500));
         const responses = [
-          `This is ${model} responding. In production, this would be a real AI response.`,
-          `${model} here! This demo shows side-by-side model comparison.`
+          `This is ${model} responding. In production, this would connect to Ollama Cloud API for real responses.`,
+          `${model} here! This demo shows side-by-side comparison of Ollama Cloud models.`
         ];
         messagesDiv.innerHTML += `<div class="message assistant"><strong>Assistant:</strong> ${responses[Math.floor(Math.random() * responses.length)]}</div>`;
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
