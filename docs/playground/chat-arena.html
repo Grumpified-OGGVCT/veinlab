@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Arena - VeinLab</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <style>
+    .arena { padding: 2rem 0; }
+    .model-selector { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .model-btn { padding: 0.75rem 1.5rem; background: var(--bg-secondary); border: 2px solid var(--border-color); border-radius: 0.5rem; color: var(--text-primary); cursor: pointer; }
+    .model-btn.active { background: var(--accent-gradient); border-color: transparent; }
+    .chat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .chat-window { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 1rem; padding: 1.5rem; min-height: 400px; }
+    .chat-header { font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
+    .messages { margin-bottom: 1rem; max-height: 350px; overflow-y: auto; }
+    .message { margin-bottom: 1rem; padding: 0.75rem; border-radius: 0.5rem; }
+    .message.user { background: var(--bg-tertiary); }
+    .message.assistant { background: rgba(102, 126, 234, 0.1); }
+    .input-area { display: flex; gap: 0.5rem; }
+    .input-area input { flex: 1; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 0.5rem; color: var(--text-primary); }
+    .input-area button { padding: 0.75rem 1.5rem; background: var(--accent-gradient); border: none; border-radius: 0.5rem; color: white; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo"><a href="../" style="text-decoration: none; color: inherit;">⚡ VeinLab</a></h1>
+      <nav class="nav"><a href="../">Home</a></nav>
+    </div>
+  </header>
+
+  <div class="arena">
+    <div class="container">
+      <h2 class="section-title">�� Chat Arena</h2>
+      <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">Compare up to 3 models side-by-side</p>
+
+      <div class="model-selector">
+        <button class="model-btn" data-model="llama2">Llama 2</button>
+        <button class="model-btn" data-model="mistral">Mistral</button>
+        <button class="model-btn" data-model="codellama">CodeLlama</button>
+      </div>
+
+      <div class="chat-grid" id="chatGrid"></div>
+
+      <div class="input-area">
+        <input type="text" id="messageInput" placeholder="Type your message..." />
+        <button onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/ollama-client.js"></script>
+  <script>
+    let selectedModels = [];
+    const maxModels = 3;
+
+    document.querySelectorAll('.model-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const model = btn.dataset.model;
+        if (selectedModels.includes(model)) {
+          selectedModels = selectedModels.filter(m => m !== model);
+          btn.classList.remove('active');
+        } else if (selectedModels.length < maxModels) {
+          selectedModels.push(model);
+          btn.classList.add('active');
+        }
+        renderChatWindows();
+      });
+    });
+
+    function renderChatWindows() {
+      const grid = document.getElementById('chatGrid');
+      grid.innerHTML = '';
+      selectedModels.forEach(model => {
+        const window = document.createElement('div');
+        window.className = 'chat-window';
+        window.innerHTML = `<div class="chat-header">${model}</div><div class="messages" id="messages-${model}"></div>`;
+        grid.appendChild(window);
+      });
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const message = input.value.trim();
+      if (!message || selectedModels.length === 0) return;
+      input.value = '';
+      
+      selectedModels.forEach(model => {
+        const messagesDiv = document.getElementById(`messages-${model}`);
+        messagesDiv.innerHTML += `<div class="message user"><strong>You:</strong> ${message}</div>`;
+      });
+
+      selectedModels.forEach(async model => {
+        const messagesDiv = document.getElementById(`messages-${model}`);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const responses = [
+          `This is ${model} responding. In production, this would be a real AI response.`,
+          `${model} here! This demo shows side-by-side model comparison.`
+        ];
+        messagesDiv.innerHTML += `<div class="message assistant"><strong>Assistant:</strong> ${responses[Math.floor(Math.random() * responses.length)]}</div>`;
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      });
+    }
+
+    document.getElementById('messageInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+  </script>
+</body>
+</html>
