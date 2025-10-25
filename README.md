@@ -2,8 +2,10 @@
 
 **Tagline:** *"From curiosity to code in 60 seconds"*
 
-[![GitHub Pages](https://img.shields.io/badge/demo-live-success)](https://grumpified-oggvct.github.io/veinlab/)
+[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://grumpified-oggvct.github.io/veinlab/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+> **🌐 Live Demo:** [https://grumpified-oggvct.github.io/veinlab/](https://grumpified-oggvct.github.io/veinlab/)
 
 An interactive GitHub Pages app that lets developers **discover**, **experiment**, and **ship** with Ollama Cloud models.
 
@@ -26,7 +28,7 @@ VeinLab provides 6 comprehensive interactive demos showcasing Ollama Cloud capab
 - Shows sources + AI synthesis
 - **Uses:** Web search capability, Tool calling
 
-### 4. �� Code Assistant
+### 4. 💻 Code Assistant
 - 6 tasks: Generate, Explain, Debug, Optimize, Convert, Document
 - Supports 10+ languages (Python, JavaScript, TypeScript, Java, C++, Go, Rust, etc.)
 - **Uses:** `qwen3-coder:480b-cloud`, Structured Outputs
@@ -44,10 +46,12 @@ VeinLab provides 6 comprehensive interactive demos showcasing Ollama Cloud capab
 
 ## 🚀 Quick Start
 
-### View Live Demo
-Visit **[https://grumpified-oggvct.github.io/veinlab/](https://grumpified-oggvct.github.io/veinlab/)**
+### 🌐 View Live Demo
+**Visit: [https://grumpified-oggvct.github.io/veinlab/](https://grumpified-oggvct.github.io/veinlab/)**
 
-### Run Locally
+No installation required - runs entirely in your browser!
+
+### 💻 Run Locally
 ```bash
 git clone https://github.com/Grumpified-OGGVCT/veinlab.git
 cd veinlab/docs
@@ -57,7 +61,7 @@ python -m http.server 8000
 # Visit http://localhost:8000
 ```
 
-### Use the API Client
+### �� Use the API Client
 ```javascript
 import { OllamaClient } from './assets/js/ollama-client.js';
 
@@ -163,7 +167,9 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 - GitHub: [@Grumpified-OGGVCT](https://github.com/Grumpified-OGGVCT)
 - Project: [VeinLab](https://github.com/Grumpified-OGGVCT/veinlab)
+- Live Demo: [https://grumpified-oggvct.github.io/veinlab/](https://grumpified-oggvct.github.io/veinlab/)
 
 ---
 
-**⚡ VeinLab** - Where Ollama Cloud Capabilities Come Alive
+**⚡ VeinLab** - Where Ollama Cloud Capabilities Come Alive  
+**🌐 Try it now:** [https://grumpified-oggvct.github.io/veinlab/](https://grumpified-oggvct.github.io/veinlab/)
